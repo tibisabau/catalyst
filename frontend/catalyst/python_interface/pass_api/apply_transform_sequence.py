@@ -13,7 +13,6 @@
 # limitations under the License.
 """This file contains the pass that applies all passes present in the program representation."""
 
-
 from dataclasses import dataclass
 
 from pennylane.typing import Callable

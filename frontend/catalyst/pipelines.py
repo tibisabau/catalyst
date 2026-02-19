@@ -89,7 +89,7 @@ class CompileOptions:
             - ``True`` or ``1`` or ``"pipeline"``: Intermediate files are saved after each pipeline.
             - ``2`` or ``"changed"``: Intermediate files are saved after each pass only if changed.
             - ``3`` or ``"pass"``: Intermediate files are saved after each pass, even if unchanged.
-        use_nameloc (Optional[bool]): If ``True``, add function parameter names to the IR as name
+        embed_var_names (Optional[bool]): If ``True``, add function parameter names to the IR as name
             locations.
         pipelines (Optional[List[Tuple[str,List[str]]]]): A list of tuples. The first entry of the
             tuple corresponds to the name of a pipeline. The second entry of the tuple corresponds
@@ -128,7 +128,7 @@ class CompileOptions:
     target: Optional[str] = "binary"
     link: Optional[bool] = True
     keep_intermediate: Optional[Union[str, int, bool, KeepIntermediateLevel]] = False
-    use_nameloc: Optional[bool] = False
+    embed_var_names: Optional[bool] = False
     pipelines: Optional[List[Any]] = None
     autograph: Optional[bool] = False
     autograph_include: Optional[Iterable[str]] = ()
@@ -151,21 +151,17 @@ class CompileOptions:
 
         # Check that async runs must not be seeded
         if self.async_qnodes and self.seed is not None:
-            raise CompileError(
-                """
+            raise CompileError("""
                 Seeding has no effect on asynchronous QNodes,
                 as the execution order of parallel runs is not guaranteed.
                 As such, seeding an asynchronous run is not supported.
-                """
-            )
+                """)
 
         # Check that seed is 32-bit unsigned int
         if (self.seed is not None) and (self.seed < 0 or self.seed > 2**32 - 1):
-            raise ValueError(
-                """
+            raise ValueError("""
                 Seed must be an unsigned 32-bit integer!
-                """
-            )
+                """)
 
         # Make the format of static_argnums easier to handle.
         static_argnums = self.static_argnums
@@ -292,9 +288,7 @@ def get_bufferization_stage(options: CompileOptions) -> List[str]:
     bufferization_options = """bufferize-function-boundaries
         allow-return-allocs-from-loops
         function-boundary-type-conversion=identity-layout-map
-        unknown-type-conversion=identity-layout-map""".replace(
-        "\n", " "
-    )
+        unknown-type-conversion=identity-layout-map""".replace("\n", " ")
     if options.async_qnodes:
         bufferization_options += " copy-before-write"
 

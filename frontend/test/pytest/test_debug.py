@@ -574,10 +574,10 @@ class TestOptionsToCliFlags:
         assert ("--load-dialect-plugin", path) in flags
         assert isinstance(options.dialect_plugins, set)
 
-    def test_option_use_nameloc(self):
-        """Test use name location option"""
+    def test_option_embed_var_names(self):
+        """Test embed variable names option"""
 
-        options = CompileOptions(use_nameloc=True)
+        options = CompileOptions(embed_var_names=True)
         flags = _options_to_cli_flags(options)
         assert "--use-nameloc-as-prefix" in flags
 
@@ -598,13 +598,11 @@ class TestOptionsToCliFlags:
         """
         observed = to_llvmir(stdin=mlir)
         # pylint: disable=line-too-long
-        expected = textwrap.dedent(
-            """
+        expected = textwrap.dedent("""
         define void @foo() {
           ret void
         }
-        """
-        ).strip()
+        """).strip()
         # pylint: enable=line-too-long
         assert expected in observed
 
@@ -620,15 +618,13 @@ class TestOptionsToCliFlags:
         """
 
         observed = to_mlir_opt(stdin=mlir)
-        expected = textwrap.dedent(
-            """
+        expected = textwrap.dedent("""
         module {
           llvm.func @foo() {
             llvm.return
           }
         }
-        """
-        ).strip()
+        """).strip()
         assert expected in observed
 
     def test_catalyst_error(self):
